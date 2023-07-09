@@ -1,11 +1,11 @@
 # Dicey Dungeon Vita
 
-<p align="center"><img src="./screenshots/game.png"></p>
-
 An attempt to create a wrapper/port of <b>Dicey Dungeons</b> for the *PS Vita*.
 
 The port works by loading the official Android ARMv7 executable in memory, resolving its imports with native functions and patching it in order to properly run.
 By doing so, it's basically as if we emulate a minimalist Android environment in which we run natively the executable as it is.
+
+Based on Thimbleweed Park Vita.
 
 ## Changelog
 
