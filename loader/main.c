@@ -1070,13 +1070,13 @@ static so_default_dynlib default_dynlib[] = {
 	{"fmodf", (uintptr_t)&fmodf},
 	{"fork", (uintptr_t)&fork},
 	{"fopen", (uintptr_t)&fopen_hook},
+	{"free", (uintptr_t)&free},
 	{"open", (uintptr_t)&open_hook},
 	{"fprintf", (uintptr_t)&fprintf},
 	{"fputc", (uintptr_t)&fputc},
 	// { "fputwc", (uintptr_t)&fputwc },
 	// { "fputs", (uintptr_t)&fputs },
 	{"fread", (uintptr_t)&fread},
-	{"free", (uintptr_t)&free},
 	{"freeaddrinfo", (uintptr_t)&freeaddrinfo},
 	{"frexp", (uintptr_t)&frexp},
 	{"frexpf", (uintptr_t)&frexpf},
@@ -1675,9 +1675,6 @@ static so_default_dynlib default_dynlib[] = {
 	{"SDL_DequeueAudio", (uintptr_t)&SDL_DequeueAudio},
 	{"SDL_DetachThread", (uintptr_t)&SDL_DetachThread},
 	{"SDL_DuplicateSurface", (uintptr_t)&SDL_DuplicateSurface},
-	{"SDL_FreeAudioStream", (uintptr_t)&SDL_FreeAudioStream},
-	{"SDL_FreeSurface", (uintptr_t)&SDL_FreeSurface},
-	{"SDL_FreeWAV", (uintptr_t)&SDL_FreeWAV},
 	{"SDL_GL_GetCurrentContext", (uintptr_t)&SDL_GL_GetCurrentContext},
 	{"SDL_GL_GetCurrentWindow", (uintptr_t)&SDL_GL_GetCurrentWindow},
 	{"SDL_GL_GetDrawableSize", (uintptr_t)&SDL_GL_GetDrawableSize},
@@ -3853,19 +3850,6 @@ void patch_game(void)
 	hook_addr(so_symbol(&diceydungeons_mod, "SDL_wcsstr_REAL"), (uintptr_t)&SDL_wcsstr);
 }
 
-void *mem_manager(void *arg)
-{
-	void (*PurgeCache)(void *this) = (void *)so_symbol(&diceydungeons_mod, "_ZN9GameScene12appLowMemoryEv");
-	for (;;)
-	{
-		if (vglMemFree(VGL_MEM_SLOW) < 22 * 1024 * 1024)
-		{
-			PurgeCache(NULL);
-		}
-		sceKernelDelayThread(3 * 1000 * 1000);
-	}
-}
-
 void *pthread_main(void *arg)
 {
 	// Disabling rearpad
@@ -3984,11 +3968,8 @@ int main(int argc, char *argv[])
 	*(uintptr_t *)(fake_env + 0x36C) = (uintptr_t)GetJavaVM;
 	*(uintptr_t *)(fake_env + 0x374) = (uintptr_t)GetStringUTFRegion;
 
-	pthread_t t, t2;
-	pthread_attr_t attr, attr2;
-	pthread_attr_init(&attr);
-	pthread_attr_setstacksize(&attr, 512 * 1024);
-	pthread_create(&t, &attr, mem_manager, NULL);
+	pthread_t t2;
+	pthread_attr_t attr2;
 
 	pthread_attr_init(&attr2);
 	pthread_attr_setstacksize(&attr2, 512 * 1024);
