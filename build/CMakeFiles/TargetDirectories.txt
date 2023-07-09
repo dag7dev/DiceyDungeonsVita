@@ -1,0 +1,6 @@
+/home/dag7/Downloads/VitaPorting/diceydungeons-vita/build/CMakeFiles/diceydungeons.dir
+/home/dag7/Downloads/VitaPorting/diceydungeons-vita/build/CMakeFiles/diceydungeons-velf.dir
+/home/dag7/Downloads/VitaPorting/diceydungeons-vita/build/CMakeFiles/eboot.bin-self.dir
+/home/dag7/Downloads/VitaPorting/diceydungeons-vita/build/CMakeFiles/diceydungeons.vpk-vpk.dir
+/home/dag7/Downloads/VitaPorting/diceydungeons-vita/build/CMakeFiles/edit_cache.dir
+/home/dag7/Downloads/VitaPorting/diceydungeons-vita/build/CMakeFiles/rebuild_cache.dir
