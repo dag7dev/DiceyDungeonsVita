@@ -99,18 +99,12 @@ extern const char *BIONIC_ctype_;
 extern const short *BIONIC_tolower_tab_;
 extern const short *BIONIC_toupper_tab_;
 
-static char data_path[128];
+static char data_path[256];
 
 static char fake_vm[0x1000];
 static char fake_env[0x1000];
 
 int framecap = 0;
-
-void *__wrap_calloc(uint32_t nmember, uint32_t size) { return vglCalloc(nmember, size); }
-void __wrap_free(void *addr) { vglFree(addr); };
-void *__wrap_malloc(uint32_t size) { return vglMalloc(size); };
-void *__wrap_memalign(uint32_t alignment, uint32_t size) { return vglMemalign(alignment, size); };
-void *__wrap_realloc(void *ptr, uint32_t size) { return vglRealloc(ptr, size); };
 
 int file_exists(const char *path)
 {
@@ -124,22 +118,7 @@ unsigned int _pthread_stack_default_user = 1 * 1024 * 1024;
 
 so_module diceydungeons_mod, diceydungeonsmain_mod;
 
-void *__wrap_memcpy(void *dest, const void *src, size_t n)
-{
-	return sceClibMemcpy(dest, src, n);
-}
-
-void *__wrap_memmove(void *dest, const void *src, size_t n)
-{
-	return sceClibMemmove(dest, src, n);
-}
-
 int ret4() { return 4; }
-
-void *__wrap_memset(void *s, int c, size_t n)
-{
-	return sceClibMemset(s, c, n);
-}
 
 char *getcwd_hook(char *buf, size_t size)
 {
@@ -557,7 +536,7 @@ void throw_exc(char **str, void *a, int b)
 FILE *fopen_hook(char *fname, char *mode)
 {
 	FILE *f;
-	char real_fname[256];
+	char real_fname[128];
 	// printf("fopen(%s,%s)\n", fname, mode);
 	if (strncmp(fname, "ux0:", 4))
 	{
@@ -3850,18 +3829,6 @@ void patch_game(void)
 	hook_addr(so_symbol(&diceydungeons_mod, "SDL_wcsstr_REAL"), (uintptr_t)&SDL_wcsstr);
 }
 
-void *pthread_main(void *arg)
-{
-	// Disabling rearpad
-	SDL_setenv("VITA_DISABLE_TOUCH_BACK", "1", 1);
-
-	int (*SDL_main)(int argc, char *argv[]) = (void *)so_symbol(&diceydungeons_mod, "SDL_main");
-
-	char *args[2];
-	args[0] = "ux0:data/diceydungeons";
-	SDL_main(1, args);
-}
-
 int main(int argc, char *argv[])
 {
 	// sceSysmoduleLoadModule(SCE_SYSMODULE_RAZOR_CAPTURE);
@@ -3968,14 +3935,14 @@ int main(int argc, char *argv[])
 	*(uintptr_t *)(fake_env + 0x36C) = (uintptr_t)GetJavaVM;
 	*(uintptr_t *)(fake_env + 0x374) = (uintptr_t)GetStringUTFRegion;
 
-	pthread_t t2;
-	pthread_attr_t attr2;
+	// Disabling rearpad
+	SDL_setenv("VITA_DISABLE_TOUCH_BACK", "1", 1);
 
-	pthread_attr_init(&attr2);
-	pthread_attr_setstacksize(&attr2, 512 * 1024);
-	pthread_create(&t2, &attr2, pthread_main, NULL);
+	int (*SDL_main)(int argc, char *argv[]) = (void *)so_symbol(&diceydungeonsmain_mod, "SDL_main");
 
-	pthread_join(t2, NULL);
+	char *args[2];
+	args[0] = "ux0:data/sosage";
+	SDL_main(1, args);
 
 	return 0;
 }
